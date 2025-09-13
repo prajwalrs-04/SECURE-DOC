@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blockchain Document Management</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+        :root {
+            --primary-color: #4CAF50;
+            --primary-dark: #45a049;
+            --accent-color: #2196F3;
+            --bg-color: #f0f2f5;
+            --card-bg: #fff;
+            --text-color: #333;
+            --placeholder-color: #999;
+            --success-color: #28a745;
+            --error-color: #dc3545;
+            --border-color: #e0e0e0;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            padding: 35px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+            margin-top: 50px;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+            font-weight: 600;
+            margin-bottom: 30px;
+            font-size: 2.2rem;
+        }
+        
+        /* Tab Navigation */
+        .tab-nav {
+            display: flex;
+            justify-content: space-around;
+            border-bottom: 2px solid var(--border-color);
+            margin-bottom: 20px;
+        }
+
+        .tab-link {
+            flex-grow: 1;
+            text-align: center;
+            padding: 15px 0;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--placeholder-color);
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .tab-link.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+        
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            color: #555;
+        }
+
+        .input-icon {
+            position: absolute;
+            top: 50%;
+            left: 15px;
+            transform: translateY(-50%);
+            color: var(--placeholder-color);
+            font-size: 1.1em;
+            pointer-events: none;
+        }
+
+        input[type="text"], input[type="file"] {
+            width: 100%;
+            padding: 12px 12px 12px 40px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 1rem;
+            color: var(--text-color);
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus, input[type="file"]:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.2);
+        }
+
+        .file-input-container {
+            position: relative;
+            display: block;
+            width: 100%;
+        }
+        
+        #file {
+            padding-left: 40px;
+        }
+
+        input[type="submit"], button {
+            background-color: var(--primary-color);
+            color: #fff;
+            border: none;
+            padding: 15px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 600;
+            width: 100%;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        input[type="submit"]:hover, button:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        
+        input[type="submit"]:active, button:active {
+            transform: translateY(0);
+        }
+        
+        .status-message {
+            margin-top: 25px;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', Courier, monospace;
+            white-space: pre-wrap;
+            overflow-x: auto;
+            border: 1px solid;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            transition: all 0.3s ease;
+        }
+
+        .status-message.success {
+            background-color: #e6f4e6;
+            color: var(--success-color);
+            border-color: #c3e6cb;
+        }
+
+        .status-message.error {
+            background-color: #fde6e6;
+            color: var(--error-color);
+            border-color: #f5c6cb;
+        }
+        
+        .status-message.loading {
+            background-color: #f0f8ff;
+            color: #2173b9;
+            border-color: #b3e0ff;
+            display: flex;
+            align-items: center;
+        }
+
+        .status-message.loading .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: var(--accent-color);
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            margin-right: 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .debug-panel {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f8f8;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            font-size: 0.8rem;
+            line-height: 1.4;
+        }
+        .debug-panel h4 {
+            margin-top: 0;
+            color: #555;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+            margin-bottom: 10px;
+        }
+        .debug-panel pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Blockchain Document Management</h1>
+
+    <div class="tab-nav">
+        <div class="tab-link active" data-tab="issue">Issue</div>
+        <div class="tab-link" data-tab="verify">Verify</div>
+        <div class="tab-link" data-tab="revoke">Revoke</div>
+        <div class="tab-link" data-tab="view-all">View All</div>
+    </div>
+
+    <!-- Issue Document Tab -->
+    <div id="issue" class="tab-content active">
+        <h2>Issue New Document</h2>
+        <form id="uploadForm" action="/upload" method="post" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="file">Select Document (PDF):</label>
+                <div class="file-input-container">
+                    <i class="fas fa-file-pdf input-icon"></i>
+                    <input type="file" id="file" name="file" accept=".pdf" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="docID">Document ID:</label>
+                <i class="fas fa-id-card input-icon"></i>
+                <input type="text" id="docID" name="docID" required placeholder="e.g., DOC001">
+            </div>
+            <div class="form-group">
+                <label for="owner">Owner:</label>
+                <i class="fas fa-user input-icon"></i>
+                <input type="text" id="owner" name="owner" required placeholder="e.g., John Doe">
+            </div>
+            <div class="form-group">
+                <label for="issuer">Issuer:</label>
+                <i class="fas fa-building input-icon"></i>
+                <input type="text" id="issuer" name="issuer" required placeholder="e.g., Ministry of Health">
+            </div>
+            <div class="form-group">
+                <label for="docType">Document Type:</label>
+                <i class="fas fa-tags input-icon"></i>
+                <input type="text" id="docType" name="docType" required placeholder="e.g., Birth Certificate">
+            </div>
+            <div class="form-group">
+                <label for="issueDate">Issue Date:</label>
+                <i class="fas fa-calendar-alt input-icon"></i>
+                <input type="text" id="issueDate" name="issueDate" required placeholder="YYYY-MM-DD">
+            </div>
+            <input type="submit" value="Upload & Register">
+        </form>
+        <div class="debug-panel">
+            <h4>Response Debugger</h4>
+            <pre id="issue-response" class="status-message"></pre>
+        </div>
+    </div>
+
+    <!-- Verify Document Tab -->
+    <div id="verify" class="tab-content">
+        <h2>Verify Document by ID</h2>
+        <form id="verifyForm">
+            <div class="form-group">
+                <label for="verifyDocID">Document ID:</label>
+                <i class="fas fa-id-card input-icon"></i>
+                <input type="text" id="verifyDocID" name="verifyDocID" required placeholder="e.g., DOC001">
+            </div>
+            <button type="submit">Verify Document</button>
+        </form>
+        <div class="debug-panel">
+            <h4>Response Debugger</h4>
+            <pre id="verify-response" class="status-message"></pre>
+        </div>
+    </div>
+
+    <!-- Revoke Document Tab -->
+    <div id="revoke" class="tab-content">
+        <h2>Revoke Document</h2>
+        <form id="revokeForm">
+            <div class="form-group">
+                <label for="revokeDocID">Document ID:</label>
+                <i class="fas fa-id-card input-icon"></i>
+                <input type="text" id="revokeDocID" name="revokeDocID" required placeholder="e.g., DOC001">
+            </div>
+            <button type="submit" style="background-color: #dc3545;">Revoke Document</button>
+        </form>
+        <div class="debug-panel">
+            <h4>Response Debugger</h4>
+            <pre id="revoke-response" class="status-message"></pre>
+        </div>
+    </div>
+    
+    <!-- View All Documents Tab -->
+    <div id="view-all" class="tab-content">
+        <h2>View All Documents</h2>
+        <button id="viewAllBtn">Fetch All Documents</button>
+        <div class="debug-panel">
+            <h4>Response Debugger</h4>
+            <pre id="view-all-response" class="status-message"></pre>
+        </div>
+    </div>
+</div>
+
+<script>
+    const backendUrl = 'http://localhost:8080';
+
+    // --- Tab Switching Logic ---
+    document.querySelectorAll('.tab-link').forEach(link => {
+        link.addEventListener('click', () => {
+            document.querySelectorAll('.tab-link').forEach(l => l.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+            link.classList.add('active');
+            document.getElementById(link.dataset.tab).classList.add('active');
+        });
+    });
+
+    // --- Helper function for fetching and displaying responses ---
+    async function fetchData(url, method, body, responseElementId) {
+        const responseMessage = document.getElementById(responseElementId);
+        responseMessage.className = 'status-message loading';
+        responseMessage.innerHTML = '<div class="spinner"></div><span>Processing... Please wait.</span>';
+        
+        try {
+            const options = {
+                method: method,
+                headers: method === 'GET' ? {} : { 'Content-Type': 'application/json' },
+                body: method === 'GET' || body instanceof FormData ? null : JSON.stringify(body)
+            };
+            
+            // Special case for file upload
+            if (body instanceof FormData) {
+                delete options.headers['Content-Type'];
+                options.body = body;
+            }
+
+            const response = await fetch(url, options);
+            const result = await response.json();
+
+            if (response.ok) {
+                responseMessage.className = 'status-message success';
+                responseMessage.innerHTML = `<strong>Success!</strong><br><br>${JSON.stringify(result, null, 2)}`;
+            } else {
+                responseMessage.className = 'status-message error';
+                const errorText = result.error || 'Something went wrong.';
+                responseMessage.innerHTML = `<strong>Error!</strong><br><br>${errorText}`;
+            }
+        } catch (error) {
+            responseMessage.className = 'status-message error';
+            responseMessage.innerHTML = `<strong>Network Error:</strong><br><br>${error.message}<br>Make sure the backend server is running on ${backendUrl}.`;
+        }
+    }
+
+    // --- Form Handlers ---
+
+    // 1. Issue Document
+    document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        await fetchData(`${backendUrl}/upload`, 'POST', formData, 'issue-response');
+    });
+
+    // 2. Verify Document
+    document.getElementById('verifyForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const docID = document.getElementById('verifyDocID').value;
+        await fetchData(`${backendUrl}/documents/${docID}`, 'GET', null, 'verify-response');
+    });
+
+    // 3. Revoke Document
+    document.getElementById('revokeForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const docID = document.getElementById('revokeDocID').value;
+        await fetchData(`${backendUrl}/documents/${docID}/revoke`, 'PUT', null, 'revoke-response');
+    });
+
+    // 4. View All Documents
+    document.getElementById('viewAllBtn').addEventListener('click', async () => {
+        await fetchData(`${backendUrl}/documents`, 'GET', null, 'view-all-response');
+    });
+</script>
+
+</body>
+</html>
